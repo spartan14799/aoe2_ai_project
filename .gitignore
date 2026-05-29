@@ -1,0 +1,9 @@
+data/
+
+01_clustering_gravitacional/target/
+**/*.rs.bk
+
+
+__pycache__/
+*.pyc
+.venv/
