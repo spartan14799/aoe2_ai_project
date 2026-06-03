@@ -7,3 +7,23 @@ data/
 __pycache__/
 *.pyc
 .venv/
+
+# --- Rust / Cargo ---
+/target/
+
+Cargo.lock
+
+**/*.rs.bk
+
+cargo-crash.log
+
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+**/target/
+**/Cargo.lock
