@@ -2,6 +2,7 @@
 name = "logistic_regression"
 version = "0.1.0"
 edition = "2024"
+default-run = "logistic_regression"
 
 [dependencies]
 csv = "1.3"

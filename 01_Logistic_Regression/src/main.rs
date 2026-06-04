@@ -93,14 +93,25 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut modelo_final = model::RegresionLogistica::new(num_features);
     modelo_final.entrenar(&x_train, &y_train, mejor_config.alpha, mejor_config.epocas);
 
+    let ruta_predicciones = "../data/test_predictions.csv";
+    let mut wtr = csv::Writer::from_path(ruta_predicciones)?;
+    
+    // LÍNEA CORREGIDA AQUÍ (Se removieron las barras invertidas '\' erróneas)
+    wtr.write_record(&["actual", "predicho"])?;
+
     // Evaluar la precisión final con el 30% de datos ocultos (Test Set)
     let mut aciertos_test = 0.0;
     for i in 0..x_test.len() {
         let prediccion = modelo_final.predecir(&x_test[i]);
+
+        wtr.write_record(&[y_test[i].to_string(), prediccion.to_string()])?;
+
         if prediccion == y_test[i] {
             aciertos_test += 1.0;
         }
     }
+
+    wtr.flush()?;
     let precision_final = aciertos_test / (x_test.len() as f64);
 
     println!("\n====================================================");
