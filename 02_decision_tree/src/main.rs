@@ -46,16 +46,21 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
     );
 
     let umbral_chi = 3.841;
-    // REGLA DE SEGURIDAD: Cada rango debe tener al menos 200 partidas totales
-    let min_partidas_por_rango = 200;
+    // REGLA DE SEGURIDAD: Cada rango debe tener al menos 2000 partidas totales
+    let min_partidas_por_rango = 2000;
+    let max_partidas_por_rango = 10000;
 
     println!(
         "Ejecutando ChiMerge Avanzado (Umbral: {}, Min Partidas: {})...",
         umbral_chi, min_partidas_por_rango
     );
 
-    let intervalos_finales =
-        ejecutar_chimerge(intervalos_iniciales, umbral_chi, min_partidas_por_rango);
+    let intervalos_finales = ejecutar_chimerge(
+        intervalos_iniciales,
+        umbral_chi,
+        min_partidas_por_rango,
+        max_partidas_por_rango,
+    );
 
     println!("\n================ CONFIGURACIÓN FINAL ================");
     println!(
@@ -160,6 +165,7 @@ fn ejecutar_chimerge(
     mut intervalos: Vec<Intervalo>,
     umbral: f64,
     min_partidas: usize,
+    max_partidas: usize,
 ) -> Vec<Intervalo> {
     loop {
         if intervalos.len() < 2 {
@@ -177,29 +183,60 @@ fn ejecutar_chimerge(
             if total_partidas < min_partidas {
                 forzar_fusion_por_tamano = true;
 
-                // Evaluamos si es mejor fusionarlo con el vecino izquierdo o el derecho
+                let mut menor_chi_p1 = f64::INFINITY;
+                let mut mejor_vecino = None;
+
+                // Función (closure) para evaluar el costo de fusionarse con un vecino
+                let mut evaluar_vecino = |vecino_idx: usize| {
+                    let tamano_vecino: usize = intervalos[vecino_idx].conteos.values().sum();
+                    let mut chi = calcular_chi_cuadrado(&intervalos[i], &intervalos[vecino_idx]);
+
+                    // PENALIZACIÓN ANTI-AGUJERO NEGRO:
+                    // Si la suma supera el límite máximo, aplicamos una multa matemática.
+                    // Esto obliga a los rangos enanos a fusionarse entre sí.
+                    if total_partidas + tamano_vecino > max_partidas {
+                        chi += 1_000_000.0;
+                    }
+
+                    if chi < menor_chi_p1 {
+                        menor_chi_p1 = chi;
+                        mejor_vecino = Some(vecino_idx);
+                    }
+                };
+
+                // Evaluamos al vecino de la izquierda
                 if i > 0 {
-                    let chi = calcular_chi_cuadrado(&intervalos[i - 1], &intervalos[i]);
-                    if chi < menor_chi {
-                        menor_chi = chi;
-                        indice_a_fusionar = Some(i - 1);
-                    }
+                    evaluar_vecino(i - 1);
                 }
+                // Evaluamos al vecino de la derecha
                 if i < intervalos.len() - 1 {
-                    let chi = calcular_chi_cuadrado(&intervalos[i], &intervalos[i + 1]);
-                    if chi < menor_chi {
-                        menor_chi = chi;
-                        indice_a_fusionar = Some(i);
+                    evaluar_vecino(i + 1);
+                }
+
+                // Ejecutamos la decisión
+                if let Some(vecino) = mejor_vecino {
+                    if vecino < i {
+                        indice_a_fusionar = Some(vecino); // Se fusiona con el izquierdo (índice vecino)
+                    } else {
+                        indice_a_fusionar = Some(i); // Se fusiona con el derecho (índice actual absorbe al de adelante)
                     }
                 }
-                // Rompemos el recorrido interno para resolver este intervalo pequeño de inmediato
-                break;
+                break; // Rompemos el for para ejecutar esta fusión
             }
         }
 
-        // PRIORIDAD 2: Si todos los intervalos son grandes, usamos el ChiMerge estándar
+        // PRIORIDAD 2: ChiMerge estándar con LÍMITE MÁXIMO
         if !forzar_fusion_por_tamano {
             for i in 0..intervalos.len() - 1 {
+                // NUEVA REGLA: Calculamos el tamaño si se llegaran a fusionar
+                let tamano_i: usize = intervalos[i].conteos.values().sum();
+                let tamano_siguiente: usize = intervalos[i + 1].conteos.values().sum();
+
+                // Si la suma supera nuestro máximo, prohibimos la fusión saltando al siguiente par
+                if tamano_i + tamano_siguiente > max_partidas {
+                    continue;
+                }
+
                 let chi = calcular_chi_cuadrado(&intervalos[i], &intervalos[i + 1]);
                 if chi < menor_chi {
                     menor_chi = chi;
@@ -207,13 +244,14 @@ fn ejecutar_chimerge(
                 }
             }
 
-            // Si el par más parecido ya supera el umbral estadístico, terminamos
-            if menor_chi >= umbral {
+            // MODIFICACIÓN CRÍTICA: Si ya superamos el umbral estadístico,
+            // O si todos los pares fueron prohibidos (indice_a_fusionar es None), terminamos el bucle.
+            if menor_chi >= umbral || indice_a_fusionar.is_none() {
                 break;
             }
         }
 
-        // Ejecutar la fusión física en el vector
+        // Ejecutar la fusión física
         if let Some(idx) = indice_a_fusionar {
             let siguiente = intervalos.remove(idx + 1);
             let actual = &mut intervalos[idx];
