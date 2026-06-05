@@ -1,4 +1,4 @@
-use csv::Reader;
+use csv::{Reader, Writer};
 use std::collections::HashMap;
 use std::error::Error;
 
@@ -15,22 +15,102 @@ struct Intervalo {
     conteos: HashMap<String, usize>,
 }
 fn main() -> std::result::Result<(), Box<dyn Error>> {
-    println!("Iniciando lector para discretización...");
+    println!("Iniciando automatización dinámica de ChiMerge...\n");
 
-    let mut rdr = Reader::from_path("data.csv")?;
-    let indice_elo = 1;
-    let indice_winner = 8;
+    let ruta_archivo = "data.csv";
+    let indice_winner = 8; // Tu columna objetivo
 
+    // 1. LEER ENCABEZADOS PARA DETECTAR EL TOTAL DE COLUMNAS
+    let mut rdr_columnas = Reader::from_path(ruta_archivo)?;
+    let total_columnas = rdr_columnas.headers()?.len();
+    println!("Columnas totales detectadas en el CSV: {}", total_columnas);
+
+    // 2. CONSTRUIR LA LISTA DE COLUMNAS CONTINUAS DINÁMICAMENTE
+    let mut columnas_a_discretizar = Vec::new();
+
+    // Agregamos la columna 1 y 2
+    columnas_a_discretizar.push(1);
+    columnas_a_discretizar.push(2);
+
+    // Agregamos desde la 10 hasta la última columna disponible
+    for col in 10..total_columnas {
+        // Evitamos procesar la columna winner si llega a estar al final
+        if col != indice_winner {
+            columnas_a_discretizar.push(col);
+        }
+    }
+
+    println!(
+        "Índices de columnas numéricas a procesar: {:?}",
+        columnas_a_discretizar
+    );
+
+    // Parámetros del algoritmo
+    let umbral_chi = 3.841;
+    let min_partidas = 2000;
+    let max_partidas = 15000;
+
+    // Aquí guardaremos los puntos de corte de cada columna
+    let mut mapa_de_cortes: HashMap<usize, Vec<f64>> = HashMap::new();
+
+    // 3. BUCLE DE PROCESAMIENTO
+    for &col_idx in &columnas_a_discretizar {
+        println!("=====================================================");
+        println!("Procesando Columna Índice: {}", col_idx);
+
+        let cortes = procesar_columna(
+            ruta_archivo,
+            col_idx,
+            indice_winner,
+            umbral_chi,
+            min_partidas,
+            max_partidas,
+        );
+
+        match cortes {
+            Ok(puntos) => {
+                println!("   Rango de clases final procesado correctamente.");
+                println!("-> Puntos de corte para columna {}: {:?}", col_idx, puntos);
+                mapa_de_cortes.insert(col_idx, puntos);
+            }
+            Err(e) => {
+                println!(
+                    "   [ERROR] No se pudo procesar la columna {}: {}",
+                    col_idx, e
+                );
+            }
+        }
+    }
+
+    println!("\n================ RESUMEN FINAL ================");
+    println!(
+        "Se han extraído con éxito las reglas para {} columnas.",
+        mapa_de_cortes.len()
+    );
+    println!("¡Todo listo para proceder con la transformación del dataset!");
+
+    Ok(())
+}
+
+fn procesar_columna(
+    ruta: &str,
+    indice_col: usize,
+    indice_winner: usize,
+    umbral: f64,
+    min_partidas: usize,
+    max_partidas: usize,
+) -> Result<Vec<f64>, Box<dyn Error>> {
+    let mut rdr = Reader::from_path(ruta)?;
     let mut muestras: Vec<DatoDiscretizacion> = Vec::new();
 
     for result in rdr.records() {
         let record = result?;
-        if let (Some(elo_str), Some(ganador_str)) =
-            (record.get(indice_elo), record.get(indice_winner))
+        if let (Some(valor_str), Some(ganador_str)) =
+            (record.get(indice_col), record.get(indice_winner))
         {
-            if let Ok(elo_num) = elo_str.parse::<f64>() {
+            if let Ok(valor_num) = valor_str.parse::<f64>() {
                 muestras.push(DatoDiscretizacion {
-                    valor: elo_num,
+                    valor: valor_num,
                     ganador: ganador_str.to_string(),
                 });
             }
@@ -40,50 +120,23 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
     muestras.sort_by(|a, b| a.valor.partial_cmp(&b.valor).unwrap());
 
     let intervalos_iniciales = inicializar_intervalos(&muestras);
-    println!(
-        "Intervalos iniciales únicos creados: {}",
-        intervalos_iniciales.len()
-    );
+    let intervalos_finales =
+        ejecutar_chimerge(intervalos_iniciales, umbral, min_partidas, max_partidas);
 
-    let umbral_chi = 3.841;
-    // REGLA DE SEGURIDAD: Cada rango debe tener al menos 2000 partidas totales
-    let min_partidas_por_rango = 2000;
-    let max_partidas_por_rango = 10000;
+    println!("   Rango de clases final: {}", intervalos_finales.len());
 
-    println!(
-        "Ejecutando ChiMerge Avanzado (Umbral: {}, Min Partidas: {})...",
-        umbral_chi, min_partidas_por_rango
-    );
-
-    let intervalos_finales = ejecutar_chimerge(
-        intervalos_iniciales,
-        umbral_chi,
-        min_partidas_por_rango,
-        max_partidas_por_rango,
-    );
-
-    println!("\n================ CONFIGURACIÓN FINAL ================");
-    println!(
-        "Cantidad de clases/rangos distintos creados: \x1b[1;32m{}\x1b[0m",
-        intervalos_finales.len()
-    );
-    println!("=====================================================");
-
-    for (i, intervalo) in intervalos_finales.iter().enumerate() {
-        let total: usize = intervalo.conteos.values().sum();
-        println!(
-            "  Rango {:02}: [{} a {}] -> Total partidas: {} {:?}",
-            i + 1,
-            intervalo.min_valor,
-            intervalo.max_valor,
-            total,
-            intervalo.conteos
-        );
-    }
-
-    Ok(())
+    // Extraemos y retornamos solo los puntos de corte
+    Ok(obtener_puntos_de_corte(&intervalos_finales))
 }
 
+fn obtener_puntos_de_corte(intervalos: &[Intervalo]) -> Vec<f64> {
+    let mut cortes = Vec::new();
+    // Guardamos el max_valor de cada intervalo excepto el último
+    for i in 0..intervalos.len() - 1 {
+        cortes.push(intervalos[i].max_valor);
+    }
+    cortes
+}
 fn inicializar_intervalos(muestras: &[DatoDiscretizacion]) -> Vec<Intervalo> {
     let mut intervalos: Vec<Intervalo> = Vec::new();
     if muestras.is_empty() {
