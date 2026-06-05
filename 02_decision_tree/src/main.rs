@@ -15,49 +15,36 @@ struct Intervalo {
     conteos: HashMap<String, usize>,
 }
 fn main() -> std::result::Result<(), Box<dyn Error>> {
-    println!("Iniciando automatización dinámica de ChiMerge...\n");
+    println!("Fase 1: Calculando puntos de corte con ChiMerge...");
 
     let ruta_archivo = "data.csv";
-    let indice_winner = 8; // Tu columna objetivo
+    let ruta_salida = "data_discreta.csv";
+    let indice_winner = 8;
 
-    // 1. LEER ENCABEZADOS PARA DETECTAR EL TOTAL DE COLUMNAS
+    // 1. DETECTAR EL TOTAL DE COLUMNAS
     let mut rdr_columnas = Reader::from_path(ruta_archivo)?;
     let total_columnas = rdr_columnas.headers()?.len();
-    println!("Columnas totales detectadas en el CSV: {}", total_columnas);
+    println!("Columnas totales detectadas: {}", total_columnas);
 
-    // 2. CONSTRUIR LA LISTA DE COLUMNAS CONTINUAS DINÁMICAMENTE
+    // 2. CONSTRUIR LA LISTA DE COLUMNAS CONTINUAS
     let mut columnas_a_discretizar = Vec::new();
-
-    // Agregamos la columna 1 y 2
     columnas_a_discretizar.push(1);
     columnas_a_discretizar.push(2);
-
-    // Agregamos desde la 10 hasta la última columna disponible
     for col in 10..total_columnas {
-        // Evitamos procesar la columna winner si llega a estar al final
         if col != indice_winner {
             columnas_a_discretizar.push(col);
         }
     }
-
-    println!(
-        "Índices de columnas numéricas a procesar: {:?}",
-        columnas_a_discretizar
-    );
 
     // Parámetros del algoritmo
     let umbral_chi = 3.841;
     let min_partidas = 2000;
     let max_partidas = 15000;
 
-    // Aquí guardaremos los puntos de corte de cada columna
     let mut mapa_de_cortes: HashMap<usize, Vec<f64>> = HashMap::new();
 
-    // 3. BUCLE DE PROCESAMIENTO
+    // 3. GENERAR EL MAPA DE CORTES
     for &col_idx in &columnas_a_discretizar {
-        println!("=====================================================");
-        println!("Procesando Columna Índice: {}", col_idx);
-
         let cortes = procesar_columna(
             ruta_archivo,
             col_idx,
@@ -67,29 +54,71 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
             max_partidas,
         );
 
-        match cortes {
-            Ok(puntos) => {
-                println!("   Rango de clases final procesado correctamente.");
-                println!("-> Puntos de corte para columna {}: {:?}", col_idx, puntos);
-                mapa_de_cortes.insert(col_idx, puntos);
-            }
-            Err(e) => {
-                println!(
-                    "   [ERROR] No se pudo procesar la columna {}: {}",
-                    col_idx, e
-                );
-            }
+        if let Ok(puntos) = cortes {
+            mapa_de_cortes.insert(col_idx, puntos);
         }
     }
+    println!("✔ Puntos de corte calculados para todas las columnas.");
 
-    println!("\n================ RESUMEN FINAL ================");
+    // 4. FASE DE TRANSFORMACIÓN Y ESCRITURA DEL NUEVO CSV
+    println!("\nFase 2: Generando nuevo archivo '{}'...", ruta_salida);
+
+    let mut rdr_transform = Reader::from_path(ruta_archivo)?;
+    let mut wtr = Writer::from_path(ruta_salida)?;
+
+    // Escribir los mismos encabezados del archivo original
+    let headers = rdr_transform.headers()?.clone();
+    wtr.write_record(&headers)?;
+
+    let mut partidas_procesadas = 0;
+
+    // Procesar cada fila de datos
+    for result in rdr_transform.records() {
+        let record = result?;
+        let mut nueva_fila = Vec::new();
+
+        for (idx, campo) in record.iter().enumerate() {
+            // Si la columna requería discretización, buscamos su rango
+            if let Some(cortes) = mapa_de_cortes.get(&idx) {
+                if let Ok(valor_num) = campo.parse::<f64>() {
+                    let rango_id = transformar_a_rango(valor_num, cortes);
+                    // Guardamos el ID del rango como string (ej: "0", "1", "2"...)
+                    nueva_fila.push(rango_id.to_string());
+                } else {
+                    nueva_fila.push(campo.to_string());
+                }
+            } else {
+                // Si es texto (civilizaciones) o el 'winner', pasa intacto
+                nueva_fila.push(campo.to_string());
+            }
+        }
+
+        wtr.write_record(&nueva_fila)?;
+        partidas_procesadas += 1;
+    }
+
+    // Asegurar que todo se guarde en el disco duro
+    wtr.flush()?;
+
+    println!("=====================================================");
+    println!("✔ ¡PROCESO COMPLETADO CON ÉXITO!");
     println!(
-        "Se han extraído con éxito las reglas para {} columnas.",
-        mapa_de_cortes.len()
+        "Partidas transformadas y guardadas: \x1b[1;32m{}\x1b[0m",
+        partidas_procesadas
     );
-    println!("¡Todo listo para proceder con la transformación del dataset!");
+    println!("Archivo generado en: {}", ruta_salida);
+    println!("=====================================================");
 
     Ok(())
+}
+
+fn transformar_a_rango(valor: f64, puntos_de_corte: &[f64]) -> usize {
+    for (indice, &corte) in puntos_de_corte.iter().enumerate() {
+        if valor <= corte {
+            return indice;
+        }
+    }
+    puntos_de_corte.len() // Si supera el último corte, pertenece al último rango
 }
 
 fn procesar_columna(
