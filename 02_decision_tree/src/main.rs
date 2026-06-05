@@ -18,8 +18,8 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
     println!("Iniciando lector para discretización...");
 
     let mut rdr = Reader::from_path("data.csv")?;
-    let indice_elo = 1; // Columna: avg_elo
-    let indice_winner = 8; // Columna: winner
+    let indice_elo = 1;
+    let indice_winner = 8;
 
     let mut muestras: Vec<DatoDiscretizacion> = Vec::new();
 
@@ -37,42 +37,41 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
         }
     }
 
-    // 1. Ordenar muestras
     muestras.sort_by(|a, b| a.valor.partial_cmp(&b.valor).unwrap());
 
-    // 2. Crear los intervalos iniciales por cada valor único
     let intervalos_iniciales = inicializar_intervalos(&muestras);
     println!(
         "Intervalos iniciales únicos creados: {}",
         intervalos_iniciales.len()
     );
 
-    // 3. Definir el umbral estadístico (Chi-Square para 1 df al 95% de confianza)
     let umbral_chi = 3.841;
+    // REGLA DE SEGURIDAD: Cada rango debe tener al menos 200 partidas totales
+    let min_partidas_por_rango = 200;
+
     println!(
-        "Ejecutando ChiMerge con un umbral estadístico de {}...",
-        umbral_chi
+        "Ejecutando ChiMerge Avanzado (Umbral: {}, Min Partidas: {})...",
+        umbral_chi, min_partidas_por_rango
     );
 
-    // 4. Ejecutar el algoritmo de fusión
-    let intervalos_finales = ejecutar_chimerge(intervalos_iniciales, umbral_chi);
+    let intervalos_finales =
+        ejecutar_chimerge(intervalos_iniciales, umbral_chi, min_partidas_por_rango);
 
-    // 5. Mostrar resultados en la terminal
     println!("\n================ CONFIGURACIÓN FINAL ================");
-    println!("La columna 'avg_elo' se discretizó con éxito.");
     println!(
         "Cantidad de clases/rangos distintos creados: \x1b[1;32m{}\x1b[0m",
         intervalos_finales.len()
     );
     println!("=====================================================");
 
-    println!("\nRangos estadísticos calculados para el Árbol de Decisión:");
     for (i, intervalo) in intervalos_finales.iter().enumerate() {
+        let total: usize = intervalo.conteos.values().sum();
         println!(
-            "  Rango {}: [{} a {}] -> Partidas analizadas: {:?}",
+            "  Rango {:02}: [{} a {}] -> Total partidas: {} {:?}",
             i + 1,
             intervalo.min_valor,
             intervalo.max_valor,
+            total,
             intervalo.conteos
         );
     }
@@ -157,42 +156,68 @@ fn calcular_chi_cuadrado(i1: &Intervalo, i2: &Intervalo) -> f64 {
     chi_cuadrado
 }
 
-fn ejecutar_chimerge(mut intervalos: Vec<Intervalo>, umbral: f64) -> Vec<Intervalo> {
+fn ejecutar_chimerge(
+    mut intervalos: Vec<Intervalo>,
+    umbral: f64,
+    min_partidas: usize,
+) -> Vec<Intervalo> {
     loop {
-        // Si nos quedamos con un solo intervalo enorme, no podemos fusionar más
         if intervalos.len() < 2 {
             break;
         }
 
         let mut menor_chi = f64::INFINITY;
         let mut indice_a_fusionar = None;
+        let mut forzar_fusion_por_tamano = false;
 
-        // Evaluamos todos los pares de intervalos adyacentes
-        for i in 0..intervalos.len() - 1 {
-            let chi = calcular_chi_cuadrado(&intervalos[i], &intervalos[i + 1]);
-            if chi < menor_chi {
-                menor_chi = chi;
-                indice_a_fusionar = Some(i);
+        // PRIORIDAD 1: Buscar si hay algún intervalo que viole la regla del tamaño mínimo
+        for i in 0..intervalos.len() {
+            let total_partidas: usize = intervalos[i].conteos.values().sum();
+
+            if total_partidas < min_partidas {
+                forzar_fusion_por_tamano = true;
+
+                // Evaluamos si es mejor fusionarlo con el vecino izquierdo o el derecho
+                if i > 0 {
+                    let chi = calcular_chi_cuadrado(&intervalos[i - 1], &intervalos[i]);
+                    if chi < menor_chi {
+                        menor_chi = chi;
+                        indice_a_fusionar = Some(i - 1);
+                    }
+                }
+                if i < intervalos.len() - 1 {
+                    let chi = calcular_chi_cuadrado(&intervalos[i], &intervalos[i + 1]);
+                    if chi < menor_chi {
+                        menor_chi = chi;
+                        indice_a_fusionar = Some(i);
+                    }
+                }
+                // Rompemos el recorrido interno para resolver este intervalo pequeño de inmediato
+                break;
             }
         }
 
-        // CONCEPTO RUST: Criterio de parada estadística.
-        // Si el par con menor diferencia supera el umbral, significa que todos los intervalos
-        // actuales ya son significativamente distintos entre sí. ¡Terminamos!
-        if menor_chi >= umbral {
-            break;
+        // PRIORIDAD 2: Si todos los intervalos son grandes, usamos el ChiMerge estándar
+        if !forzar_fusion_por_tamano {
+            for i in 0..intervalos.len() - 1 {
+                let chi = calcular_chi_cuadrado(&intervalos[i], &intervalos[i + 1]);
+                if chi < menor_chi {
+                    menor_chi = chi;
+                    indice_a_fusionar = Some(i);
+                }
+            }
+
+            // Si el par más parecido ya supera el umbral estadístico, terminamos
+            if menor_chi >= umbral {
+                break;
+            }
         }
 
-        // Ejecutamos la fusión del intervalo `idx` y el `idx + 1`
+        // Ejecutar la fusión física en el vector
         if let Some(idx) = indice_a_fusionar {
-            // .remove() elimina el elemento del vector y desplaza los demás. Es costoso pero seguro.
             let siguiente = intervalos.remove(idx + 1);
             let actual = &mut intervalos[idx];
-
-            // Expandimos el rango del intervalo actual para que absorba al siguiente
             actual.max_valor = siguiente.max_valor;
-
-            // Combinamos los HashMap de conteos de victorias
             for (clase, conteo) in siguiente.conteos {
                 *actual.conteos.entry(clase).or_insert(0) += conteo;
             }
