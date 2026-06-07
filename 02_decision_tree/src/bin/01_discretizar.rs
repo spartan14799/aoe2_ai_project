@@ -20,24 +20,39 @@ struct Intervalo {
 fn main() -> std::result::Result<(), Box<dyn Error>> {
     println!("=== FASE 1: DISCRETIZACIÓN DE DATOS ===");
 
-    let ruta_archivo = "data.csv";
+    let ruta_archivo = "data_preparada.csv";
     let ruta_salida = "data_discreta.csv";
     let ruta_reporte = "reporte_rangos.txt";
-    let indice_winner = 8;
 
     let mut rdr_columnas = Reader::from_path(ruta_archivo)?;
-    let total_columnas = rdr_columnas.headers()?.len();
+    let headers = rdr_columnas.headers()?.clone();
+    let total_columnas = headers.len();
 
-    let mut columnas_a_discretizar = vec![1, 2];
-    for col in 9..total_columnas {
-        if col != indice_winner {
+    let columnas_ignoradas = vec!["winner", "avg_elo", "p1_civ", "p2_civ"];
+
+    let indice_winner = headers
+        .iter()
+        .position(|h| h == "winner")
+        .ok_or("No 'winner' column found in data_preparada.csv")?;
+
+    let mut columnas_a_discretizar = Vec::new();
+    for col in 0..total_columnas {
+        let nombre_columna = &headers[col];
+
+        // 2. Si el nombre de la columna NO está en la lista negra, la discretizamos
+        if !columnas_ignoradas.contains(&nombre_columna) {
             columnas_a_discretizar.push(col);
+        } else {
+            println!(
+                "⏭ Saltando discretización para la columna categórica/ignorada: '{}'",
+                nombre_columna
+            );
         }
     }
 
     let umbral_chi = 3.841;
-    let min_partidas = 2000;
-    let max_partidas = 10000;
+    let min_partidas = 100;
+    let max_partidas = 50000;
 
     let mut mapa_de_cortes: HashMap<usize, Vec<f64>> = HashMap::new();
     let mut archivo_reporte = File::create(ruta_reporte)?;
@@ -59,7 +74,11 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
 
             // Escribir el detalle en el reporte
             writeln!(archivo_reporte, "-----------------------------------------")?;
-            writeln!(archivo_reporte, "COLUMNA ÍNDICE: {}", col_idx)?;
+            writeln!(
+                archivo_reporte,
+                "COLUMNA NOMBRE: '{}' (ÍNDICE: {})",
+                &headers[col_idx], col_idx
+            )?;
             for (i, intervalo) in intervalos_finales.iter().enumerate() {
                 writeln!(
                     archivo_reporte,
@@ -111,7 +130,6 @@ fn transformar_a_rango(valor: f64, puntos_de_corte: &[f64]) -> usize {
     puntos_de_corte.len()
 }
 
-// Nota: Retornamos también los 'Intervalos' para poder imprimir el reporte
 fn procesar_columna(
     ruta: &str,
     indice_col: usize,
@@ -126,7 +144,6 @@ fn procesar_columna(
     for result in rdr.records() {
         let record = result?;
 
-        // 2. Usamos 'record' mediante referencias de forma segura
         if let (Some(valor_str), Some(ganador_str)) =
             (record.get(indice_col), record.get(indice_winner))
         {
@@ -139,13 +156,19 @@ fn procesar_columna(
         }
     }
 
+    if muestras.is_empty() {
+        return Err("No numeric data found".into());
+    }
+
     muestras.sort_by(|a, b| a.valor.partial_cmp(&b.valor).unwrap());
     let iniciales = inicializar_intervalos(&muestras);
     let finales = ejecutar_chimerge(iniciales, umbral, min, max);
 
     let mut cortes = Vec::new();
-    for i in 0..finales.len() - 1 {
-        cortes.push(finales[i].max_valor);
+    if !finales.is_empty() {
+        for i in 0..finales.len() - 1 {
+            cortes.push(finales[i].max_valor);
+        }
     }
 
     Ok((cortes, finales))
@@ -291,7 +314,7 @@ fn ejecutar_chimerge(
                     indice_a_fusionar = Some(i);
                 }
             }
-            if menor_chi >= umbral || indice_a_fusionar.is_none() {
+            if (menor_chi >= umbral && intervalos.len() <= 6) || indice_a_fusionar.is_none() {
                 break;
             }
         }

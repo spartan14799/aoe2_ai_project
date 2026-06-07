@@ -12,7 +12,7 @@ struct Fila {
     ganador: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 enum Nodo {
     Hoja(String),
     Decision {
@@ -28,7 +28,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     // 1. CARGAR DATOS
     let mut rdr = Reader::from_path("data_discreta.csv")?;
     let headers = rdr.headers()?.clone();
-    let indice_winner = 8; // Asegúrate de que este es el índice correcto en tu CSV
+
+    let indice_winner = headers
+        .iter()
+        .position(|h| h == "winner")
+        .ok_or("No 'winner' column found in data_discreta.csv")?;
+
+    let mut feature_names = Vec::new();
+    for (i, name) in headers.iter().enumerate() {
+        if i != indice_winner {
+            feature_names.push(name.to_string());
+        }
+    }
 
     let mut dataset: Vec<Fila> = Vec::new();
     for result in rdr.records() {
@@ -65,14 +76,57 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
     println!("  -> Set de Testeo (30%): {} partidas\n", test_set.len());
 
-    // 3. 10-FOLD CROSS VALIDATION (VARIANDO PARÁMETROS)
+    // 3. SELECCIÓN DE COLUMNAS ÚTILES
+    let num_caracteristicas = train_set[0].caracteristicas.len();
+    let mut columnas_disponibles = Vec::new();
+
+    for col in 0..num_caracteristicas {
+        let col_name = &feature_names[col];
+        if col_name == "match_id" {
+            println!(
+                "✂ Columna '{}' (índice {}) excluida permanentemente (ID único)",
+                col_name, col
+            );
+            continue;
+        }
+
+        let mut valores_unicos = HashMap::new();
+        for fila in &train_set {
+            valores_unicos.insert(&fila.caracteristicas[col], true);
+        }
+
+        if valores_unicos.len() > 1 {
+            if valores_unicos.len() > 40 {
+                println!(
+                    "Columna '{}' (índice {}) descartada por alta cardinalidad ({} valores únicos). ¡Peligro de sobreajuste!",
+                    col_name,
+                    col,
+                    valores_unicos.len()
+                );
+                continue;
+            }
+            columnas_disponibles.push(col);
+        } else {
+            println!(
+                "⚠ Columna '{}' (índice {}) descartada (Solo contiene ceros o un único valor)",
+                col_name, col
+            );
+        }
+    }
+    println!(
+        "Columnas útiles conservadas para el entrenamiento: {} de {}\n",
+        columnas_disponibles.len(),
+        num_caracteristicas
+    );
+
+    // 4. 10-FOLD CROSS VALIDATION (VARIANDO PARÁMETROS)
     println!("================ CROSS VALIDATION (10-FOLD) ================");
-    let parametros_a_probar = vec![5, 10]; // Probaremos Profundidad Máxima = 5 y 10
+    let parametros_a_probar = vec![3, 5]; // Dejamos las profundidad 3 y 5
     let mut mejor_parametro = 0;
     let mut mejor_precision_cv = 0.0;
 
     for &max_profundidad in &parametros_a_probar {
-        let precision_promedio = k_fold_cv(&train_set, 10, max_profundidad);
+        let precision_promedio = k_fold_cv(&train_set, 10, max_profundidad, &columnas_disponibles);
         println!(
             "Profundidad Máxima: {:02} -> Precisión Promedio CV: {:.2}%",
             max_profundidad,
@@ -85,56 +139,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
-    // 4. ENTRENAMIENTO FINAL Y TESTEO REAL
+    // 5. ENTRENAMIENTO FINAL Y TESTEO REAL
     println!("\n================ PRUEBA FINAL EN TEST SET ================");
     println!(
         "Entrenando modelo final con todo el 70% usando el mejor parámetro (Profundidad: {})...",
         mejor_parametro
     );
 
-    let num_caracteristicas = train_set[0].caracteristicas.len();
-    let mut columnas_disponibles = Vec::new();
-
-    for col in 0..num_caracteristicas {
-        if col == 0 {
-            println!(
-                "✂ Columna índice {} excluida permanentemente (ID único detectado)",
-                col
-            );
-            continue;
-        }
-        // Usamos un HashMap para contar cuántos valores distintos tiene esta columna
-        let mut valores_unicos = HashMap::new();
-        for fila in &train_set {
-            valores_unicos.insert(&fila.caracteristicas[col], true);
-        }
-
-        // Si la columna tiene más de un valor único, es útil para el árbol
-        if valores_unicos.len() > 1 {
-            if valores_unicos.len() > 20 {
-                println!(
-                    "Columna índice {} descartada por alta cardinalidad ({} valores únicos). ¡Peligro de sobreajuste!",
-                    col,
-                    valores_unicos.len()
-                );
-                continue;
-            }
-            columnas_disponibles.push(col);
-        } else {
-            println!(
-                "⚠ Columna índice {} descartada (Solo contiene ceros o un único valor)",
-                col
-            );
-        }
-    }
-    println!(
-        "Columnas útiles conservadas para el entrenamiento: {} de {}\n",
-        columnas_disponibles.len(),
-        num_caracteristicas
-    );
-
-    let modelo_final = construir_arbol(&train_set, columnas_disponibles, mejor_parametro, 0);
-    println!("Estructura del Nodo Raíz: {:#?}", modelo_final);
+    let modelo_final =
+        construir_arbol(&train_set, columnas_disponibles.clone(), mejor_parametro, 0);
+    // println!("Estructura del Nodo Raíz: {:#?}", modelo_final);
 
     // Evaluar contra el 30% que nunca ha visto el modelo
     let mut aciertos = 0;
@@ -201,6 +215,41 @@ fn calcular_ganancia(filas: &[Fila], col_idx: usize) -> f64 {
     entropia_total - entropia_subconjuntos
 }
 
+/// Calcula la Intrinsic Info (Split Info) para una columna específica
+fn calcular_split_info(filas: &[Fila], col_idx: usize) -> f64 {
+    let total_filas = filas.len() as f64;
+    if total_filas == 0.0 {
+        return 0.0;
+    }
+
+    let mut subconjuntos: HashMap<&String, usize> = HashMap::new();
+    for fila in filas {
+        *subconjuntos
+            .entry(&fila.caracteristicas[col_idx])
+            .or_insert(0) += 1;
+    }
+
+    let mut split_info = 0.0;
+    for &conteo in subconjuntos.values() {
+        let p = conteo as f64 / total_filas;
+        if p > 0.0 {
+            split_info -= p * p.log2();
+        }
+    }
+    split_info
+}
+
+/// Calcula la Relación de Ganancia (Gain Ratio) para una columna específica
+fn calcular_relacion_ganancia(filas: &[Fila], col_idx: usize) -> f64 {
+    let ganancia = calcular_ganancia(filas, col_idx);
+    let split_info = calcular_split_info(filas, col_idx);
+    if split_info == 0.0 {
+        0.0
+    } else {
+        ganancia / split_info
+    }
+}
+
 /// Determina la clase más frecuente (para las hojas del árbol)
 fn clase_mayoritaria(filas: &[Fila]) -> String {
     let mut conteos = HashMap::new();
@@ -230,19 +279,19 @@ fn construir_arbol(
         return Nodo::Hoja(clase_mayoria);
     }
 
-    // Buscar la mejor columna (Mayor Information Gain)
-    let mut mejor_ganancia = -1.0;
+    // Buscar la mejor columna (Mayor Gain Ratio)
+    let mut mejor_gain_ratio = -1.0;
     let mut mejor_columna = 0;
 
     for &col_idx in &columnas_disponibles {
-        let ganancia = calcular_ganancia(filas, col_idx);
-        if ganancia > mejor_ganancia {
-            mejor_ganancia = ganancia;
+        let gain_ratio = calcular_relacion_ganancia(filas, col_idx);
+        if gain_ratio > mejor_gain_ratio {
+            mejor_gain_ratio = gain_ratio;
             mejor_columna = col_idx;
         }
     }
 
-    if mejor_ganancia <= 0.0 {
+    if mejor_gain_ratio <= 0.0 {
         return Nodo::Hoja(clase_mayoria.clone());
     }
 
@@ -301,7 +350,12 @@ fn predecir(nodo: &Nodo, fila: &Fila) -> String {
 }
 
 /// Ejecuta K-Fold Cross Validation y retorna la precisión promedio
-fn k_fold_cv(filas: &[Fila], k: usize, max_profundidad: usize) -> f64 {
+fn k_fold_cv(
+    filas: &[Fila],
+    k: usize,
+    max_profundidad: usize,
+    columnas_disponibles: &[usize],
+) -> f64 {
     let tamano_fold = filas.len() / k;
     let mut precision_total = 0.0;
 
@@ -324,8 +378,12 @@ fn k_fold_cv(filas: &[Fila], k: usize, max_profundidad: usize) -> f64 {
             }
         }
 
-        let num_caract = train_fold[0].caracteristicas.len();
-        let arbol = construir_arbol(&train_fold, (0..num_caract).collect(), max_profundidad, 0);
+        let arbol = construir_arbol(
+            &train_fold,
+            columnas_disponibles.to_vec(),
+            max_profundidad,
+            0,
+        );
 
         let mut aciertos = 0;
         for test_fila in &test_fold {
