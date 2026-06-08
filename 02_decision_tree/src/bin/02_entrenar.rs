@@ -98,7 +98,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         if valores_unicos.len() > 1 {
             if valores_unicos.len() > 40 {
                 println!(
-                    "Columna '{}' (índice {}) descartada por alta cardinalidad ({} valores únicos). ¡Peligro de sobreajuste!",
+                    "Columna '{}' (índice {}) descartada por alta cardinalidad ({} valores únicos), puede haber sobreajuste",
                     col_name,
                     col,
                     valores_unicos.len()
@@ -108,7 +108,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             columnas_disponibles.push(col);
         } else {
             println!(
-                "⚠ Columna '{}' (índice {}) descartada (Solo contiene ceros o un único valor)",
+                "Columna '{}' (índice {}) descartada (Solo contiene ceros o un único valor)",
                 col_name, col
             );
         }
@@ -121,7 +121,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // 4. 10-FOLD CROSS VALIDATION (VARIANDO PARÁMETROS)
     println!("================ CROSS VALIDATION (10-FOLD) ================");
-    let parametros_a_probar = vec![3, 5]; // Dejamos las profundidad 3 y 5
+    let parametros_a_probar = vec![3, 4, 5]; // Dejamos las profundidad 3 y 5
     let mut mejor_parametro = 0;
     let mut mejor_precision_cv = 0.0;
 
@@ -191,7 +191,7 @@ fn calcular_entropia(filas: &[Fila]) -> f64 {
     entropia
 }
 
-/// Calcula la Ganancia de Información (IG) para una columna específica
+/// Calcula el Gain para una columna específica
 fn calcular_ganancia(filas: &[Fila], col_idx: usize) -> f64 {
     let entropia_total = calcular_entropia(filas);
     let total_filas = filas.len() as f64;
@@ -263,7 +263,7 @@ fn clase_mayoritaria(filas: &[Fila]) -> String {
         .unwrap_or_else(|| "0".to_string())
 }
 
-// --- CONSTRUCCIÓN DEL ÁRBOL (ID3) ---
+// En esta sección construimos el árbol
 
 fn construir_arbol(
     filas: &[Fila],

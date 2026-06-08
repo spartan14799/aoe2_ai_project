@@ -56,7 +56,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Columnas preservadas de la data cruda
     let mut preserved_cols = Vec::new();
     for col_name in &[
-        "winner", "avg_elo", "time", "map", "map_size", "duration", "p1_civ", "p2_civ",
+        "winner", "avg_elo", "time", "map", "map_size", "p1_civ", "p2_civ",
     ] {
         if let Some(idx) = cruda_headers.iter().position(|h| h == *col_name) {
             preserved_cols.push((idx, col_name.to_string()));
@@ -94,7 +94,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     for (idx, name) in cruda_headers.iter().enumerate() {
         if name.starts_with("p1_") {
             let suffix = &name[3..];
-            if suffix == "civ" {
+            if suffix == "civ" || suffix == "villager_count" {
                 continue; // Saltar civilización ya que no es numérica
             }
             let p2_name = format!("p2_{}", suffix);

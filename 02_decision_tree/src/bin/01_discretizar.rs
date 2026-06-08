@@ -51,7 +51,7 @@ fn main() -> std::result::Result<(), Box<dyn Error>> {
     }
 
     let umbral_chi = 3.841;
-    let min_partidas = 100;
+    let min_partidas = 200;
     let max_partidas = 50000;
 
     let mut mapa_de_cortes: HashMap<usize, Vec<f64>> = HashMap::new();
