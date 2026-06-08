@@ -27,3 +27,10 @@ cargo-crash.log
 
 **/target/
 **/Cargo.lock
+
+# --- Datasets ---
+*.csv
+
+# --- Outputs y Modelos ---
+02_neural_network/output/
+*.pkl
