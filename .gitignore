@@ -29,8 +29,8 @@ cargo-crash.log
 **/Cargo.lock
 
 # --- Datasets ---
-*.csv
+# Los CSV se suben al git (no se ignoran)
 
-# --- Outputs y Modelos ---
-02_neural_network/output/
+# --- Outputs y Modelos entrenados ---
+**/output/
 *.pkl

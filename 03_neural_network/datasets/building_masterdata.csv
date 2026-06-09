@@ -1,0 +1,36 @@
+﻿Type;Building;Wood;Stone;Gold
+Economic; Town Center;275;100;0
+Economic; House;25;0;0
+Economic; Mill;100;0;0
+Economic;Rice Farm;60;0;0
+Economic; Farm;60;0;0
+Economic; Lumber Camp;100;0;0
+Economic; Mining Camp;100;0;0
+Economic; Fish Trap;100;0;0
+Economic; Market;175;0;0
+Economic; Folwark;125;0;0
+Economic; Harbor;150;0;0
+Economic; Dock;150;0;0
+Economic; Feitoria;0;250;250
+Economic; Wonder;1;1;1
+Research; Blacksmith;150;0;0
+Research; University;200;0;0
+Military Production; Monastery;175;0;0
+Military Production; Barracks;175;0;0
+Military Production; Archery Range;175;0;0
+Military Production; Stable;175;0;0
+Military Production; Siege Workshop;200;0;0
+Military Production; Castle;0;650;0
+Military Production; Donjon;75;175;0
+Military Production; Krepost;0;350;0
+Defensive Structures; Palisade Wall;3;0;0
+Defensive Structures; Palisade Gate;20;0;0
+Defensive Structures; Stone Wall;0;5;0
+Defensive Structures; Gate;0;30;0
+Defensive Structures; Fortified Wall;0;5;0
+Defensive Structures; Fortified Gate;0;30;0
+Defensive Structures; Outpost;25;5;0
+Defensive Structures; Watch Tower;50;125;0
+Defensive Structures; Guard Tower;50;125;0
+Defensive Structures; Keep;50;125;0
+Defensive Structures; Bombard Tower;0;125;100
