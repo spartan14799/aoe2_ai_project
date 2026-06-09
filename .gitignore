@@ -28,3 +28,10 @@ cargo-crash.log
 
 **/target/
 **/Cargo.lock
+
+# --- Datasets ---
+# Los CSV se suben al git (no se ignoran)
+
+# --- Outputs y Modelos entrenados ---
+**/output/
+*.pkl

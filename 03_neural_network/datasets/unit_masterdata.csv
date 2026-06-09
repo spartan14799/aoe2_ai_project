@@ -1,0 +1,212 @@
+﻿Type;Unit;Building;Food;Wood;Gold
+Villager;Villager;Town Center;50;0;0
+Monk;Monk;Monastery;0;0;100
+Monk;Missionary;Monastery;0;0;100
+Trade Cart;Trade Cart;Market;0;100;50
+Infantry; Militia;Barracks;60;0;20
+Infantry; Man-at-Arms;Barracks;60;0;20
+Infantry; Long Swordsman;Barracks;60;0;20
+Infantry; Two-Handed Swordsman;Barracks;60;0;20
+Infantry; Champion;Barracks;60;0;20
+Infantry; Spearman;Barracks;35;25;0
+Infantry; Pikeman;Barracks;35;25;0
+Infantry; Halberdier;Barracks;35;25;0
+Infantry; Eagle Scout;Barracks;20;0;50
+Infantry; Eagle Warrior;Barracks;20;0;50
+Infantry; Elite Eagle Warrior;Barracks;20;0;50
+Infantry; Woad Raider;Castle;65;0;25
+Infantry; Elite Woad Raider;Castle;65;0;25
+Infantry; Throwing Axeman;Castle;55;0;25
+Infantry; Elite Throwing Axeman;Castle;55;0;25
+Infantry; Huskarl;Castle;80;0;40
+Infantry; Elite Huskarl;Castle;80;0;40
+Infantry; Samurai;Castle;60;0;30
+Infantry; Elite Samurai;Castle;60;0;30
+Infantry; Teutonic Knight;Castle;85;0;40
+Infantry; Elite Teutonic Knight;Castle;85;0;40
+Infantry; Berserk;Castle;65;0;25
+Infantry; Elite Berserk;Castle;65;0;25
+Infantry; Jaguar Warrior;Castle;60;0;30
+Infantry; Elite Jaguar Warrior;Castle;60;0;30
+Infantry; Kamayuk;Castle;60;0;30
+Infantry; Elite Kamayuk;Castle;60;0;30
+Infantry; Condottiero;Barracks;50;0;35
+Infantry; Shotel Warrior;Castle;50;0;35
+Infantry; Elite Shotel Warrior;Castle;50;0;35
+Infantry; Gbeto;Castle;50;0;40
+Infantry; Elite Gbeto;Castle;50;0;40
+Infantry; Karambit Warrior;Castle;25;0;15
+Infantry; Elite Karambit Warrior;Castle;25;0;15
+Infantry; Dismounted Konnik;Castle ;0;0;0
+Infantry; Elite Dismounted Konnik;Castle;0;0;0
+Infantry; Serjeant;Castle;60;0;35
+Infantry; Serjeant;Castle;60;0;35
+Infantry; Elite Serjeant;Castle;60;0;35
+Infantry; Flemish Militia;Town Center;60;0;25
+Infantry; Obuch;Castle;55;0;20
+Infantry; Elite Obuch;Castle;55;0;20
+Infantry; Urumi Swordsman;Castle;65;0;20
+Infantry; Elite Urumi Swordsman;Castle;65;0;20
+Infantry; Chakram Thrower;Castle;65;0;30
+Infantry; Elite Chakram Thrower;Castle;65;0;30
+Infantry; Ghulam;Castle;30;0;45
+Infantry; Elite Ghulam;Castle;30;0;45
+Foot Archer unit; Archer;Ar. Range;0;25;45
+Foot Archer unit; Crossbowman;Ar. Range;0;25;45
+Foot Archer unit; Arbalester;Ar. Range;0;25;45
+Foot Archer unit; Skirmisher;Ar. Range;25;35;0
+Foot Archer unit; Elite Skirmisher;Ar. Range;25;35;0
+Foot Archer unit; Imperial Skirmisher;Ar. Range;25;35;0
+Foot Archer unit; Longbowman;Castle;0;35;40
+Foot Archer unit; Elite Longbowman;Castle;0;35;40
+Foot Archer unit; Chu Ko Nu;Castle;0;40;35
+Foot Archer unit; Elite Chu Ko Nu;Castle;0;40;35
+Foot Archer unit; Plumed Archer;Castle;0;55;55
+Foot Archer unit; Elite Plumed Archer;Castle;0;55;55
+Foot Archer unit; Slinger;Ar. Range;30;0;40
+Foot Archer unit; Genoese Crossbowman;Castle;0;45;40
+Foot Archer unit; Elite Genoese Crossbowman;Castle;0;45;40
+Foot Archer unit; Rattan Archer;Castle;0;50;45
+Foot Archer unit; Elite Rattan Archer;Castle;0;50;45
+Cavalry; Scout Cavalry;Stable;80;0;0
+Cavalry; Light Cavalry;Stable;80;0;0
+Cavalry; Hussar;Stable;80;0;0
+Cavalry; Winged Hussar;Stable;80;0;0
+Cavalry; Xolotl Warrior;Stable;60;0;75
+Cavalry; Knight;Stable;60;0;75
+Cavalry; Cavalier;Stable;60;0;75
+Cavalry; Paladin;Stable;60;0;75
+Cavalry; Camel Scout;Stable;55;0;60
+Cavalry; Camel Rider;Stable;55;0;60
+Cavalry; Heavy Camel Rider;Stable;55;0;60
+Cavalry; Imperial Camel Rider;Stable;55;0;60
+Cavalry; Battle Elephant;Stable;120;0;70
+Cavalry; Elite Battle Elephant;Stable;120;0;70
+Cavalry; Steppe Lancer;Stable;70;0;40
+Cavalry; Elite Steppe Lancer;Stable;70;0;40
+Cavalry; Armored Elephant;Siege Workshop;130;0;95
+Cavalry; Siege Elephant;Siege Workshop;130;0;95
+Cavalry; Shrivamsha Rider;Stable;70;0;20
+Cavalry; Elite Shrivamsha Rider;Stable;70;0;20
+Cavalry; Cataphract;Castle;70;0;75
+Cavalry; Elite Cataphract;Castle;70;0;75
+Cavalry; War Elephant;Castle;170;0;85
+Cavalry; Elite War Elephant;Castle;170;0;85
+Cavalry; Mameluke;Castle;55;0;85
+Cavalry; Elite Mameluke;Castle;55;0;85
+Cavalry; Tarkan;Stable;60;0;60
+Cavalry; Elite Tarkan;Stable;60;0;60
+Cavalry; Magyar Huszar;Castle;80;0;10
+Cavalry; Elite Magyar Huszar;Castle;80;0;10
+Cavalry; Boyar;Castle;50;0;80
+Cavalry; Elite Boyar;Castle;50;0;80
+Cavalry; Konnik;Castle;60;0;70
+Cavalry; Elite Konnik;Castle;60;0;70
+Cavalry; Leitis;Castle;70;0;50
+Cavalry; Elite Leitis;Castle;70;0;50
+Cavalry; Keshik;Castle;60;0;40
+Cavalry; Elite Keshik;Castle;60;0;40
+Cavalry; Coustillier;Castle;55;0;55
+Cavalry; Elite Coustillier;Castle;55;0;55
+Cavalry; Ratha (melee);Castle;0;0;60
+Cavalry; Elite Ratha (melee);Castle;0;0;6
+Siege unit; Battering Ram;Siege Workshop;75;36;38
+Siege unit; Capped Ram;Siege Workshop;75;36;38
+Siege unit; Siege Ram;Siege Workshop;75;36;21
+Siege unit; Armored Elephant;Siege Workshop;95;36;4
+Siege unit; Siege Elephant;Siege Workshop;95;36;4
+Siege unit; Mangonel;Siege Workshop;135;46;42
+Siege unit; Onager;Siege Workshop;135;46;40
+Siege unit; Siege Onager;Siege Workshop;135;46;13
+Siege unit; Scorpion;Siege Workshop;75;30;42
+Siege unit; Heavy Scorpion;Siege Workshop;75;30;27
+Siege unit; Siege Tower;Siege Workshop;160;36;42
+Siege unit; Bombard Cannon;Siege Workshop;225;56;23
+Siege unit; Houfnice;Siege Workshop;225;56;1
+Siege unit; Petard;Castle;25;25;42
+Siege unit; Trebuchet (packed);Castle;200;50;42
+Siege unit; Trebuchet (unpacked);Castle;200;50;42
+Siege unit; Flamethrower;Castle;50;31;0
+Siege unit; Organ Gun;Castle;70;21;1
+Siege unit; Elite Organ Gun;Castle;70;21;1
+Siege unit; Ballista Elephant;Castle;80;25;1
+Siege unit; Elite Ballista Elephant;Castle;80;25;1
+Siege unit; Flaming Camel;Castle;30;20;1
+Siege unit; Hussite Wagon;Castle;70;21;1
+Siege unit; Elite Hussite Wagon;Castle;70;21;1
+Siege unit;Trebuchet;Castle;0;200;200
+Gunpowder; Cannon Galleon;Dock;200;150;46
+Gunpowder; Elite Cannon Galleon;Dock;200;150;46
+Gunpowder; Arambai;Castle;75;60;18
+Gunpowder; Elite Arambai;Castle;75;60;18
+Gunpowder; Hussite Wagon;Castle;110;70;21
+Gunpowder; Hand Cannoneer;Archery Range;0;50;34
+Gunpowder; Janissary;Castle;0;55;21
+Gunpowder; Elite Hussite Wagon;Castle;110;70;21
+Gunpowder; Bombard Cannon;Siege W.;225;225;56
+Gunpowder; Houfnice;Siege W.;225;225;56
+Gunpowder; Elite Janissary;Castle;0;55;21
+Gunpowder; Royal Janissary;Scenario Editor;;;
+Gunpowder; Conquistador;Castle;0;70;24
+Gunpowder; Elite Conquistador;Castle;0;70;24
+Gunpowder; Organ Gun;Castle;80;70;21
+Gunpowder; Elite Organ Gun;Castle;80;70;21
+Gunpowder; Turtle Ship;Dock;180;180;50
+Gunpowder; Elite Turtle Ship;Dock;180;180;50
+Gunpowder; Cannon Galleon;Dock;200;150;46
+Gunpowder; Elite Cannon Galleon;Dock;200;150;46
+Gunpowder; Arambai;Castle;75;60;18
+Gunpowder; Elite Arambai;Castle;75;60;18
+Gunpowder; Hussite Wagon;Castle;110;70;21
+Gunpowder; Hand Cannoneer;Archery Range;0;50;34
+Gunpowder; Janissary;Castle;0;55;21
+Gunpowder; Elite Hussite Wagon;Castle;110;70;21
+Gunpowder; Bombard Cannon;Siege W.;225;225;56
+Gunpowder; Houfnice;Siege W.;225;225;56
+Gunpowder; Elite Janissary;Castle;0;55;21
+Gunpowder; Conquistador;Castle;0;70;24
+Gunpowder; Elite Conquistador;Castle;0;70;24
+Gunpowder; Organ Gun;Castle;80;70;21
+Gunpowder; Elite Organ Gun;Castle;80;70;21
+Gunpowder; Turtle Ship;Dock;180;180;50
+Gunpowder; Elite Turtle Ship;Dock;180;180;50
+Ship; Fishing Ship;Dock;0;75;0
+Ship; Transport Ship;Dock;0;125;0
+Ship; Trade Cog;Dock;0;100;50
+Ship; Galley;Dock;0;90;30
+Ship; War Galley;Dock;0;90;30
+Ship; Galleon;Dock;0;90;30
+Ship; Fire Galley;Dock;0;75;45
+Ship; Fire Ship;Dock;0;75;45
+Ship; Fast Fire Ship;Dock;0;75;45
+Ship; Demolition Raft;Dock;0;70;50
+Ship; Demolition Ship;Dock;0;70;50
+Ship; Heavy Demolition Ship;Dock;0;70;50
+Ship; Cannon Galleon;Dock;0;200;150
+Ship; Elite Cannon Galleon;Dock;0;200;150
+Ship; Canoe;Dock;0;60;20
+Ship; Dragon Ship;Dock;0;180;180
+Ship; Junk;Dock;0;0;0
+Ship; Longboat;Dock;0;100;50
+Ship; Elite Longboat;Dock;0;100;50
+Ship; Turtle Ship;Dock;0;180;180
+Ship; Elite Turtle Ship;Dock;0;180;180
+Ship; Caravel;Dock;0;90;40
+Ship; Elite Caravel;Dock;0;90;40
+Ship; Thirisadai;Dock;0;180;60
+Mounted Archer;Cavalry Archer;Ar. Range;0;40;60
+Mounted Archer;Heavy Cavalry Archer;Ar. Range;0;40;60
+Mounted Archer;Elephant Archer;Ar. Range;80;0;70
+Mounted Archer;Elite Elephant Archer;Ar. Range;80;0;70
+Mounted Archer;Mangudai;Castle;0;55;65
+Mounted Archer;Elite Mangudai;Castle;0;55;65
+Mounted Archer;War Wagon;Castle;0;125;60
+Mounted Archer; Elite War Wagon;Castle;0;125;60
+Mounted Archer;Camel Archer;Castle;0;50;60
+Mounted Archer;Elite Camel Archer;Castle;0;50;60
+Mounted Archer;Genitour;Ar. Range;40;35;0
+Mounted Archer;Elite Genitour;Ar. Range;40;35;0
+Mounted Archer;Kipchak;Castle;0;60;35
+Mounted Archer;Elite Kipchak;Castle;0;60;35
+Mounted Archer;Ratha;Castle;0;60;60
+Mounted Archer;Elite Ratha;Castle;0;60;60
