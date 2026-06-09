@@ -2,17 +2,17 @@ use std::error::Error;
 use std::fs::File;
 use std::path::Path;
 use csv::ReaderBuilder;
-use rayon::prelude::*; // Paralelismo multi-hilo
+use rayon::prelude::*; 
 
-// Constantes de filtrado según especificaciones
+//Variables de filtro
 const ELO_MINIMO: f64 = 900.0;
-const DURACION_MINIMA_SEGUNDOS: i32 = 1200; // 20 minutos de duración mínima de juego
-const TIEMPO_SNAPSHOT_SEGUNDOS: i32 = 1200; // Límite de procesamiento de acciones (Minuto 20)
+const DURACION_MINIMA_SEGUNDOS: i32 = 1200; 
+const TIEMPO_SNAPSHOT_SEGUNDOS: i32 = 1200; 
 
 struct PartidaFiltrada {
     match_id: String,
     avg_elo: f64,
-    winner_target: f64, // 1.0 o 0.0 según el CSV indexado
+    winner_target: f64, 
     p1_villagers_snapshot: f64,
     p2_villagers_snapshot: f64,
 }
@@ -36,7 +36,6 @@ pub fn ejecutar_limpieza() -> Result<(), Box<dyn Error>> {
     let carpeta_inputs = "../data/raw/inputs/inputs"; 
     let ruta_salida = "../data/processed/clear_dataset.csv";
 
-    // Validar que el archivo maestro exista antes de continuar
     if !Path::new(ruta_snapshots).exists() {
         return Err(format!("No se encontró el archivo maestro en: {}. Asegúrate de moverlo a esa ubicación.", ruta_snapshots).into());
     }
@@ -55,7 +54,7 @@ pub fn ejecutar_limpieza() -> Result<(), Box<dyn Error>> {
 
     let mut partidas_candidatas = Vec::new();
 
-    println!("Filtrando partidas (Mapa: Arabia, ELO >= {}, Duración >= 20 min)...", ELO_MINIMO);
+    println!("Filtrando partidas");
     
     for result in rdr.records() {
         let record = result?;
@@ -64,15 +63,12 @@ pub fn ejecutar_limpieza() -> Result<(), Box<dyn Error>> {
         let elo: f64 = record.get(idx_elo).unwrap_or("0").parse().unwrap_or(0.0);
         let mapa = record.get(idx_map).unwrap_or("");
         let duracion: i32 = record.get(idx_duration).unwrap_or("0").parse().unwrap_or(0);
-        
-        // FILTROS EXIGIDOS POR EL PAPER Y TU CONSULTA
+       
+        //Filtrado con las constantes Arabia HardCoded
         if elo >= ELO_MINIMO && mapa == "Arabia" && duracion >= DURACION_MINIMA_SEGUNDOS {
             let match_id = record.get(idx_match_id).unwrap_or("").to_string();
             let winner_str = record.get(idx_winner).unwrap_or("0");
-            
-            // SOLUCIÓN AL BUG DEL GANADOR: Parseo directo del target original numérico (0.0 o 1.0)
             let winner_target: f64 = winner_str.parse().unwrap_or(0.0);
-
             let p1_vil: f64 = record.get(idx_p1_vil).unwrap_or("0").parse().unwrap_or(0.0);
             let p2_vil: f64 = record.get(idx_p2_vil).unwrap_or("0").parse().unwrap_or(0.0);
 
@@ -86,15 +82,13 @@ pub fn ejecutar_limpieza() -> Result<(), Box<dyn Error>> {
         }
     }
     println!("Se identificaron {} partidas que cumplen con los criterios estructurales.", partidas_candidatas.len());
-
-    // 2. EXTRACCIÓN MÚLTI-HILO DE LOS LOGS DE INPUTS (Hasta minuto 20)
-    println!("Procesando logs de acciones detalladas en paralelo...");
+    println!("Procesando logs de acciones...");
     
     let registros_limpios: Vec<FilaLimpia> = partidas_candidatas.par_iter().filter_map(|partida| {
         let ruta_input_match = format!("{}/{}_inputs.csv", carpeta_inputs, partida.match_id);
         
         if !Path::new(&ruta_input_match).exists() {
-            return None; // Salto seguro si el archivo individual de inputs no se encuentra
+            return None;
         }
 
         let mut input_rdr = match ReaderBuilder::new().from_path(&ruta_input_match) {
@@ -120,7 +114,6 @@ pub fn ejecutar_limpieza() -> Result<(), Box<dyn Error>> {
             if let Ok(row) = row_res {
                 let ts: i32 = row.get(idx_ts).unwrap_or("0").parse().unwrap_or(0);
                 
-                // Restricción temporal estricta: No procesar acciones ocurridas tras el minuto 20 (1200s)
                 if ts > TIEMPO_SNAPSHOT_SEGUNDOS {
                     break; 
                 }
@@ -148,9 +141,8 @@ pub fn ejecutar_limpieza() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        // Computación de Atributos Diferenciales Simétricos
         let diff_villagers_snapshot = partida.p1_villagers_snapshot - partida.p2_villagers_snapshot;
-        let diff_apm = (p1_act - p2_act) / 20.0; // Acciones netas por minuto promedio en los primeros 20 min
+        let diff_apm = (p1_act - p2_act) / 20.0; 
         let diff_queues = p1_queues - p2_queues;
         let diff_builds = p1_builds - p2_builds;
         let diff_orders = p1_orders - p2_orders;
@@ -167,7 +159,6 @@ pub fn ejecutar_limpieza() -> Result<(), Box<dyn Error>> {
         })
     }).collect();
 
-    // 3. ESCRITURA DEL DATASET CENTRALIZADO LIMPIO
     let mut wtr = csv::Writer::from_path(ruta_salida)?;
 
     wtr.write_record(&[
