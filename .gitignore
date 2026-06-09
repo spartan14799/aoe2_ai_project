@@ -1,6 +1,7 @@
 data/
 
 01_clustering_gravitacional/target/
+02_decision_tree/target/
 **/*.rs.bk
 
 

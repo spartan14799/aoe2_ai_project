@@ -1,0 +1,159 @@
+=== DICCIONARIO DE RANGOS DE DISCRETIZACIÓN ===
+
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_feudal_time' (ÍNDICE: 4)
+  Rango 00: [-1200 a -57]
+  Rango 01: [-56 a -27]
+  Rango 02: [-26 a 10]
+  Rango 03: [11 a 55]
+  Rango 04: [56 a 453]
+  Rango 05: [454 a 1197]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_castle_time' (ÍNDICE: 5)
+  Rango 00: [-1200 a -981]
+  Rango 01: [-980 a -431]
+  Rango 02: [-430 a -44]
+  Rango 03: [-43 a 19]
+  Rango 04: [20 a 494]
+  Rango 05: [498 a 1200]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_imperial_time' (ÍNDICE: 6)
+  Rango 00: [-1182 a 0]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_eco_bldg_wood' (ÍNDICE: 7)
+  Rango 00: [-2370 a -550]
+  Rango 01: [-545 a -250]
+  Rango 02: [-245 a -80]
+  Rango 03: [-75 a 250]
+  Rango 04: [255 a 490]
+  Rango 05: [495 a 3530]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_eco_bldg_stone' (ÍNDICE: 8)
+  Rango 00: [-400 a -100]
+  Rango 01: [0 a 0]
+  Rango 02: [100 a 100]
+  Rango 03: [200 a 500]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_bldg_wood' (ÍNDICE: 9)
+  Rango 00: [-4920 a -275]
+  Rango 01: [-270 a -95]
+  Rango 02: [-90 a 20]
+  Rango 03: [25 a 90]
+  Rango 04: [95 a 270]
+  Rango 05: [275 a 9250]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_bldg_stone' (ÍNDICE: 10)
+  Rango 00: [-1955 a -285]
+  Rango 01: [-280 a -5]
+  Rango 02: [0 a 0]
+  Rango 03: [5 a 120]
+  Rango 04: [125 a 125]
+  Rango 05: [130 a 1650]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_eco_unit_food' (ÍNDICE: 11)
+  Rango 00: [-8450 a -600]
+  Rango 01: [-550 a -350]
+  Rango 02: [-300 a -200]
+  Rango 03: [-150 a 150]
+  Rango 04: [200 a 450]
+  Rango 05: [500 a 13150]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_eco_unit_wood' (ÍNDICE: 12)
+  Rango 00: [-450 a 300]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_eco_unit_gold' (ÍNDICE: 13)
+  Rango 00: [-100 a 150]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_unit_food' (ÍNDICE: 14)
+  Rango 00: [-4070 a -1230]
+  Rango 01: [-1225 a -75]
+  Rango 02: [-70 a 175]
+  Rango 03: [180 a 180]
+  Rango 04: [185 a 3500]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_unit_wood' (ÍNDICE: 15)
+  Rango 00: [-1635 a -452]
+  Rango 01: [-450 a -180]
+  Rango 02: [-179 a -49]
+  Rango 03: [-46 a 48]
+  Rango 04: [49 a 370]
+  Rango 05: [374 a 2425]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_unit_gold' (ÍNDICE: 16)
+  Rango 00: [-3600 a -770]
+  Rango 01: [-765 a -190]
+  Rango 02: [-188 a -15]
+  Rango 03: [-10 a 294]
+  Rango 04: [295 a 588]
+  Rango 05: [590 a 4395]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_tech_food' (ÍNDICE: 17)
+  Rango 00: [-27150 a -875]
+  Rango 01: [-850 a -155]
+  Rango 02: [-150 a 95]
+  Rango 03: [100 a 620]
+  Rango 04: [625 a 1050]
+  Rango 05: [1075 a 21475]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_tech_wood' (ÍNDICE: 18)
+  Rango 00: [-1500 a -100]
+  Rango 01: [-75 a -50]
+  Rango 02: [-25 a 25]
+  Rango 03: [50 a 75]
+  Rango 04: [100 a 150]
+  Rango 05: [175 a 1575]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_tech_gold' (ÍNDICE: 19)
+  Rango 00: [-4350 a -300]
+  Rango 01: [-280 a -200]
+  Rango 02: [-180 a -30]
+  Rango 03: [-25 a 45]
+  Rango 04: [50 a 295]
+  Rango 05: [300 a 5650]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_mil_unit_count' (ÍNDICE: 20)
+  Rango 00: [-66 a -20]
+  Rango 01: [-19 a -12]
+  Rango 02: [-11 a -7]
+  Rango 03: [-6 a 1]
+  Rango 04: [2 a 10]
+  Rango 05: [11 a 102]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_villagers_snapshot' (ÍNDICE: 21)
+  Rango 00: [-169 a -12]
+  Rango 01: [-11 a -7]
+  Rango 02: [-6 a -4]
+  Rango 03: [-3 a 3]
+  Rango 04: [4 a 9]
+  Rango 05: [10 a 263]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_apm' (ÍNDICE: 22)
+  Rango 00: [-129.55 a -27.85]
+  Rango 01: [-27.8 a -15]
+  Rango 02: [-14.95 a -4.15]
+  Rango 03: [-4.1 a 6.9]
+  Rango 04: [6.95 a 15.9]
+  Rango 05: [15.95 a 90.4]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_queues' (ÍNDICE: 23)
+  Rango 00: [-200 a -18]
+  Rango 01: [-17 a -8]
+  Rango 02: [-7 a -1]
+  Rango 03: [0 a 6]
+  Rango 04: [7 a 23]
+  Rango 05: [24 a 284]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_builds' (ÍNDICE: 24)
+  Rango 00: [-43 a -11]
+  Rango 01: [-10 a -6]
+  Rango 02: [-5 a -2]
+  Rango 03: [-1 a 3]
+  Rango 04: [4 a 10]
+  Rango 05: [11 a 77]
+-----------------------------------------
+COLUMNA NOMBRE: 'diff_orders' (ÍNDICE: 25)
+  Rango 00: [-335 a -33]
+  Rango 01: [-32 a -8]
+  Rango 02: [-7 a 0]
+  Rango 03: [1 a 25]
+  Rango 04: [26 a 528]
